@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AEGIS — Entropy Forensics Engine | Smart Contract Security</title>
+    <meta name="description" content="World's first content-agnostic smart contract vulnerability detection engine. 24 entropy dimensions. p=1.64e-7. 16/16 experiments passed. 10 real vulnerabilities found in Virtuals Protocol.">
+    <meta name="keywords" content="AEGIS, entropy, smart contract security, zero-day detection, EFI Engine, DeSci, Solana, blockchain security">
+    <meta property="og:title" content="AEGIS — Entropy Forensics Engine">
+    <meta property="og:description" content="World's first entropy-based smart contract vulnerability detection. 24 dimensions. p=1.64e-7.">
+    <meta property="og:type" content="website">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a25;
+            --primary: #00d4ff;
+            --primary-glow: rgba(0, 212, 255, 0.15);
+            --accent: #7c3aed;
+            --accent-glow: rgba(124, 58, 237, 0.15);
+            --text: #e2e8f0;
+            --text-muted: #64748b;
+            --text-dim: #475569;
+            --border: #1e293b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --gradient: linear-gradient(135deg, #00d4ff 0%, #7c3aed 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover { color: var(--primary); }
+
+        .nav-cta {
+            padding: 8px 20px;
+            background: var(--gradient);
+            border-radius: 8px;
+            color: #000 !important;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        /* Hero */
+        .hero {
+            padding: 140px 24px 80px;
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: var(--accent-glow);
+            border: 1px solid var(--accent);
+            border-radius: 100px;
+            font-size: 13px;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            font-size: 56px;
+            font-weight: 800;
+            letter-spacing: -2px;
+            line-height: 1.1;
+            margin-bottom: 20px;
+        }
+
+        .hero h1 .gradient {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: var(--text-muted);
+            max-width: 650px;
+            margin: 0 auto 40px;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            flex-wrap: wrap;
+            margin-top: 48px;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-stat-label {
+            font-size: 13px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 15px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--primary-glow);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--primary);
+        }
+
+        /* Sections */
+        section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 24px;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title h2 {
+            font-size: 40px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+        }
+
+        .section-title p {
+            color: var(--text-muted);
+            font-size: 18px;
+        }
+
+        /* Problem Section */
+        .problem-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+        }
+
+        .problem-card, .solution-card {
+            padding: 32px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+        }
+
+        .problem-card { border-color: var(--danger); }
+        .solution-card { border-color: var(--success); }
+
+        .problem-card h3, .solution-card h3 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .problem-card ul, .solution-card ul {
+            list-style: none;
+        }
+
+        .problem-card li, .solution-card li {
+            padding: 8px 0;
+            color: var(--text-muted);
+            font-size: 15px;
+            display: flex;
+            align-items: start;
+            gap: 8px;
+        }
+
+        .problem-card li::before { content: "✗"; color: var(--danger); font-weight: bold; }
+        .solution-card li::before { content: "✓"; color: var(--success); font-weight: bold; }
+
+        /* Dimensions */
+        .dims-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .dim-card {
+            padding: 24px;
+            border-radius: 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .dim-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--primary);
+            transform: translateY(-4px);
+        }
+
+        .dim-number {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .dim-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 8px 0;
+        }
+
+        .dim-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* Validation */
+        .validation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+        }
+
+        .validation-card {
+            padding: 28px;
+            border-radius: 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .validation-value {
+            font-size: 36px;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .validation-label {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* Tokenomics */
+        .tokenomics-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            align-items: center;
+        }
+
+        .tokenomics-info h3 {
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+
+        .tokenomics-info ul {
+            list-style: none;
+        }
+
+        .tokenomics-info li {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 15px;
+        }
+
+        .tokenomics-info li span:last-child {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .token-visual {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+        }
+
+        .token-circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                var(--primary) 0deg 252deg,
+                var(--accent) 252deg 324deg,
+                var(--success) 324deg 360deg
+            );
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .token-circle::after {
+            content: '';
+            position: absolute;
+            width: 70%;
+            height: 70%;
+            background: var(--bg);
+            border-radius: 50%;
+        }
+
+        .token-center {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .token-center .symbol {
+            font-size: 32px;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .token-center .supply {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .token-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        /* Roadmap */
+        .roadmap {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .roadmap::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--primary), var(--accent), var(--border));
+        }
+
+        .roadmap-item {
+            position: relative;
+            padding-bottom: 40px;
+        }
+
+        .roadmap-item::before {
+            content: '';
+            position: absolute;
+            left: -32px;
+            top: 4px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--bg);
+            border: 2px solid var(--primary);
+        }
+
+        .roadmap-item.done::before {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .roadmap-item.current::before {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 12px var(--primary-glow);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 12px var(--primary-glow); }
+            50% { box-shadow: 0 0 24px var(--primary-glow); }
+        }
+
+        .roadmap-phase {
+            font-size: 13px;
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .roadmap-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 4px 0 8px;
+        }
+
+        .roadmap-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .roadmap-status {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: 8px;
+        }
+
+        .status-done { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        .status-current { background: rgba(0, 212, 255, 0.15); color: var(--primary); }
+        .status-planned { background: rgba(100, 116, 139, 0.15); color: var(--text-muted); }
+
+        /* CTA */
+        .cta {
+            text-align: center;
+            padding: 100px 24px;
+        }
+
+        .cta h2 {
+            font-size: 40px;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        .cta p {
+            color: var(--text-muted);
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 48px 24px;
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover { color: var(--primary); }
+
+        .footer-copy {
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 36px; }
+            .problem-grid, .tokenomics-container { grid-template-columns: 1fr; }
+            .nav-links a:not(.nav-cta) { display: none; }
+            .hero-stats { gap: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+    <div class="nav-container">
+        <div class="logo">AEGIS</div>
+        <div class="nav-links">
+            <a href="#problem">Problem</a>
+            <a href="#dimensions">24 Dimensions</a>
+            <a href="#validation">Validation</a>
+            <a href="#tokenomics">Tokenomics</a>
+            <a href="#roadmap">Roadmap</a>
+            <a href="https://github.com/EntroProtocol/efi-24d" target="_blank" class="nav-cta">GitHub</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+    <div class="hero-badge">
+        <span>🔬 DeSci Security Research</span>
+    </div>
+    <h1>
+        The World's First<br>
+        <span class="gradient">Entropy-Based Smart Contract Security Engine</span>
+    </h1>
+    <p>
+        AEGIS analyzes bytecode across 24 orthogonal entropy dimensions to detect zero-day vulnerabilities —
+        without reading source code, without pattern matching, without rule databases.
+        Just pure mathematics.
+    </p>
+    <div class="hero-buttons">
+        <a href="#validation" class="btn btn-primary">See the Proof →</a>
+        <a href="https://github.com/EntroProtocol/efi-24d" target="_blank" class="btn btn-secondary">View on GitHub</a>
+    </div>
+    <div class="hero-stats">
+        <div class="hero-stat">
+            <div class="hero-stat-value">24</div>
+            <div class="hero-stat-label">Entropy Dimensions</div>
+        </div>
+        <div class="hero-stat">
+            <div class="hero-stat-value">1.64e⁻⁷</div>
+            <div class="hero-stat-label">p-value</div>
+        </div>
+        <div class="hero-stat">
+            <div class="hero-stat-value">16/16</div>
+            <div class="hero-stat-label">Experiments Passed</div>
+        </div>
+        <div class="hero-stat">
+            <div class="hero-stat-value">10</div>
+            <div class="hero-stat-label">Real Vulns Found</div>
+        </div>
+    </div>
+</div>
+
+<!-- Problem -->
+<section id="problem">
+    <div class="section-title">
+        <h2>The Zero-Day Problem</h2>
+        <p>Traditional tools can only find vulnerabilities they've already seen. AEGIS finds what they can't.</p>
+    </div>
+    <div class="problem-grid">
+        <div class="problem-card">
+            <h3>❌ Traditional Tools (Slither, Mythril)</h3>
+            <ul>
+                <li>Rule-based pattern matching — only finds known vulnerabilities</li>
+                <li>Requires source code or decompilation</li>
+                <li>Cannot detect novel zero-day attacks</li>
+                <li>Defeated by code refactoring and obfuscation</li>
+                <li>Slow symbolic execution — path explosion</li>
+                <li>Backward-looking: rules written AFTER exploits happen</li>
+            </ul>
+        </div>
+        <div class="solution-card">
+            <h3>✅ AEGIS Entropy Forensics</h3>
+            <ul>
+                <li>Mathematical entropy analysis — detects NOVEL vulnerabilities</li>
+                <li>Works on bytecode only — no source code needed</li>
+                <li>Content-agnostic — obfuscation is irrelevant</li>
+                <li>Falsification-resistant — genetic algorithms can't forge profiles</li>
+                <li>Fast vector calculations — no symbolic execution</li>
+                <li>Forward-looking: finds vulnerabilities BEFORE exploitation</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- Dimensions -->
+<section id="dimensions">
+    <div class="section-title">
+        <h2>The 24 Entropy Dimensions</h2>
+        <p>Each dimension measures a unique mathematical property of smart contract bytecode.</p>
+    </div>
+    <div class="dims-grid">
+        <div class="dim-card">
+            <div class="dim-number">D1</div>
+            <div class="dim-name">Shannon Entropy</div>
+            <div class="dim-desc">Global byte distribution randomness</div>
+        </div>
+        <div class="dim-card">
+            <div class="dim-number">D2</div>
+            <div class="dim-name">Normalized Shannon</div>
+            <div class="dim-desc">Scale-invariant entropy [0,1]</div>
+        </div>
+        <div class="dim-card">
+            <div class="dim-number">D3</div>
+            <div class="dim-name">Kolmogorov Complexity</div>
+            <div class="dim-desc">Algorithmic compressibility ratio</div>
+        </div>
+        <div class="dim-card">
+            <div class="dim-number">D4</div>
+            <div class="dim-name">Permutation Entropy</div>
+            <div class="dim-desc">Local order patterns in byte sequences</div>
+        </div>
+        <div class="dim-card">
+            <div class="dim-number">D5</div>
+            <div class="dim-name">Spectral Entropy</div>
+            <div class="dim-desc">FFT frequency domain distribution</div>
+        </div>
+        <div class="dim-card">
+            <div class="dim-number">D6</div>
+            <div class="dim-name">Min-Entropy</div>
+            <div class="dim-desc">Worst-case opcode bias detection</div>
+        </div>
+        <div class="dim-card">
+            <div class="dim-number">D7</div>
+            <div class="dim-name">Sample Entropy</div>
+            <div class="dim-desc">Self-similarity and predictability</div>
+        </div>
+        <div class="dim-card">
+            <div class="dim-number">D8</div>
+            <div class="dim-name">Approximate Entropy</div>
+            <div class="dim-desc">Complexity and regularity</div>
+        </div>
+        <div class="dim-card">
+            <div class="dim-number">D9</div>
+            <div class="dim-name">Lempel-Ziv Complexity</div>
+            <div class="dim-desc">Algorithmic information density</div>
+        </div>
+        <div class="dim-card">
+            <div class="dim-number">D10</div>
+            <div class="dim-name">Tsallis Entropy</div>
+            <div class="dim-desc">Non-extensive statistical mechanics</div>
+        </div>
+        <div class="dim-card">
+            <div class="dim-number">D11</div>
+            <div class="dim-name">Rényi Entropy</div>
+            <div class="dim-desc">Generalized entropy family</div>
+        </div>
+        <div class="dim-card">
+            <div class="dim-number">D12</div>
+            <div class="dim-name">Higuchi Fractal Dimension</div>
+            <div class="dim-desc">Fractal complexity of bytecode signal</div>
+        </div>
+        <div class="dim-card">
+            <div class="dim-number">D13</div>
+            <div class="dim-name">DFA Hurst Exponent</div>
+            <div class="dim-desc">Long-range correlation and persistence</div>
+        </div>
+        <div class="dim-card">
+            <div class="dim-number">D14</div>
+            <div class="dim-name">SVD Entropy</div>
+            <div class="dim-desc">Singular value decomposition entropy</div>
+        </div>
+        <div class="dim-card">
+            <div class="dim-number">D15</div>
+            <div class="dim-name">Opcode Diversity</div>
+            <div class="dim-desc">Normalized unique opcode count</div>
+        </div>
+        <div class="dim-card">
+            <div class="dim-number">D16-D18</div>
+            <div class="dim-name">N-Gram Entropy</div>
+            <div class="dim-desc">2-gram, 3-gram, 4-gram sequence entropy</div>
+        </div>
+        <div class="dim-card">
+            <div class="dim-number">D19</div>
+            <div class="dim-name">Markov Transition</div>
+            <div class="dim-desc">256×256 opcode state transition matrix entropy</div>
+        </div>
+        <div class="dim-card">
+            <div class="dim-number">D20</div>
+            <div class="dim-name">Wavelet Packet</div>
+            <div class="dim-desc">Multi-resolution decomposition — captures what FFT misses</div>
+        </div>
+        <div class="dim-card">
+            <div class="dim-number">D21</div>
+            <div class="dim-name">Opcode Graph</div>
+            <div class="dim-desc">Graph degree distribution entropy</div>
+        </div>
+        <div class="dim-card">
+            <div class="dim-number">D22</div>
+            <div class="dim-name">Entropy Rate</div>
+            <div class="dim-desc">Conditional entropy — true information generation rate</div>
+        </div>
+        <div class="dim-card">
+            <div class="dim-number">D23</div>
+            <div class="dim-name">Storage Pattern</div>
+            <div class="dim-desc">SLOAD/SSTORE sequence entropy</div>
+        </div>
+        <div class="dim-card">
+            <div class="dim-number">D24</div>
+            <div class="dim-name">Cross-Contract Z-Score</div>
+            <div class="dim-desc">Statistical anomaly from peer group baseline</div>
+        </div>
+    </div>
+</section>
+
+<!-- Validation -->
+<section id="validation">
+    <div class="section-title">
+        <h2>Proven. Validated. Real.</h2>
+        <p>Not theory. Not promises. Real results from real contracts.</p>
+    </div>
+    <div class="validation-grid">
+        <div class="validation-card">
+            <div class="validation-value">1.64×10⁻⁷</div>
+            <div class="validation-label">Statistical p-value across 10,000 contract baseline. Less than 1 in 6.1 million probability of random occurrence.</div>
+        </div>
+        <div class="validation-card">
+            <div class="validation-value">16/16</div>
+            <div class="validation-label">Experiments passed — Uniswap V2 (reentrancy), Uniswap V3 (delegatecall), Balancer V2 (temporal), and 13 more.</div>
+        </div>
+        <div class="validation-card">
+            <div class="validation-value">55K+</div>
+            <div class="validation-label">AI agents scanned in live production audit of Virtuals Protocol. Source code was NOT available — bytecode only.</div>
+        </div>
+        <div class="validation-card">
+            <div class="validation-value">10</div>
+            <div class="validation-label">Real vulnerabilities found: 3 CRITICAL, 3 HIGH, 3 MEDIUM, 1 LOW. Full report sent to security team.</div>
+        </div>
+        <div class="validation-card">
+            <div class="validation-value">73</div>
+            <div class="validation-label">Contracts in ML training baseline. Isolation Forest anomaly detection with <5% false positive rate.</div>
+        </div>
+        <div class="validation-card">
+            <div class="validation-value">100%</div>
+            <div class="validation-label">Falsification resistance. Genetic algorithms deployed to forge profiles — all attempts failed.</div>
+        </div>
+    </div>
+</section>
+
+<!-- Tokenomics -->
+<section id="tokenomics">
+    <div class="section-title">
+        <h2>Tokenomics</h2>
+        <p>$AEGIS — Hyper-deflationary. Revenue-driven. Community-aligned.</p>
+    </div>
+    <div class="tokenomics-container">
+        <div class="tokenomics-info">
+            <h3>$AEGIS on Solana</h3>
+            <ul>
+                <li><span>Token Symbol</span><span>AEGIS</span></li>
+                <li><span>Blockchain</span><span>Solana</span></li>
+                <li><span>Total Supply</span><span>1,000,000,000</span></li>
+                <li><span>Launch Method</span><span>Fair Launch (Pump.fun)</span></li>
+                <li><span>Presale</span><span>None</span></li>
+                <li><span>Team Allocation</span><span>0%</span></li>
+                <li><span>Liquidity</span><span>Locked</span></li>
+                <li><span>Revenue Model</span><span>B2B SaaS + Grants</span></li>
+                <li><span>Deflation</span><span>Buy-back & Burn</span></li>
+                <li><span>Burn Rate</span><span>100% of Revenue</span></li>
+            </ul>
+        </div>
+        <div>
+            <div class="token-visual">
+                <div class="token-circle">
+                    <div class="token-center">
+                        <div class="symbol">$AEGIS</div>
+                        <div class="supply">1B Supply</div>
+                    </div>
+                </div>
+            </div>
+            <div class="token-legend">
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: var(--primary)"></div>
+                    <span>Fair Launch — 70% (Public)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: var(--accent)"></div>
+                    <span>Liquidity — 20% (Locked)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: var(--success)"></div>
+                    <span>Reserve — 10% (Grants + R&D)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Roadmap -->
+<section id="roadmap">
+    <div class="section-title">
+        <h2>Roadmap</h2>
+        <p>Built step by step. Real technology first.</p>
+    </div>
+    <div class="roadmap">
+        <div class="roadmap-item done">
+            <div class="roadmap-phase">Phase 1</div>
+            <div class="roadmap-title">EFI Engine (6D) <span class="roadmap-status status-done">Done</span></div>
+            <div class="roadmap-desc">Core 6 entropy dimensions. Shannon, Normalized, Kolmogorov, Permutation, Spectral, Min-Entropy. Validated on 16 contracts.</div>
+        </div>
+        <div class="roadmap-item done">
+            <div class="roadmap-phase">Phase 2</div>
+            <div class="roadmap-title">EFI 18D Elite <span class="roadmap-status status-done">Done</span></div>
+            <div class="roadmap-desc">12 additional dimensions from statistical physics and signal processing. Sample entropy, Tsallis, Rényi, Higuchi, DFA, SVD.</div>
+        </div>
+        <div class="roadmap-item done">
+            <div class="roadmap-phase">Phase 3</div>
+            <div class="roadmap-title">EFI 24D Brutal <span class="roadmap-status status-done">Done</span></div>
+            <div class="roadmap-desc">6 revolutionary dimensions: Markov Transition, Wavelet Packet, Opcode Graph, Entropy Rate, Storage Pattern, Cross-Contract Z-Score. ML Isolation Forest anomaly detection.</div>
+        </div>
+        <div class="roadmap-item current">
+            <div class="roadmap-phase">Phase 4</div>
+            <div class="roadmap-title">$AEGIS Token Launch <span class="roadmap-status status-current">In Progress</span></div>
+            <div class="roadmap-desc">Fair launch on Solana via Pump.fun. Website, whitepaper, GitHub public repo, social media all ready.</div>
+        </div>
+        <div class="roadmap-item">
+            <div class="roadmap-phase">Phase 5</div>
+            <div class="roadmap-title">Rust Production Core <span class="roadmap-status status-planned">Planned</span></div>
+            <div class="roadmap-desc">Production Rust implementation with CUDA acceleration. 50,000+ contracts/second throughput.</div>
+        </div>
+        <div class="roadmap-item">
+            <div class="roadmap-phase">Phase 6</div>
+            <div class="roadmap-title">FastAPI + SDK <span class="roadmap-status status-planned">Planned</span></div>
+            <div class="roadmap-desc">REST API and Python SDK for B2B clients. CI/CD pipeline integration. Real-time WebSocket threat streams.</div>
+        </div>
+        <div class="roadmap-item">
+            <div class="roadmap-phase">Phase 7</div>
+            <div class="roadmap-title">B2B SaaS Launch <span class="roadmap-status status-planned">Planned</span></div>
+            <div class="roadmap-desc">Enterprise security platform. $500-$2,000/month per client. 100% revenue → buy-back & burn $AEGIS.</div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<div class="cta">
+    <h2>Not Another Scanner.<br><span style="background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">A New Paradigm in Security.</span></h2>
+    <p>Real code. Real audits. Real results. Open source on GitHub.</p>
+    <div class="cta-buttons">
+        <a href="https://github.com/EntroProtocol/efi-24d" target="_blank" class="btn btn-primary">View on GitHub →</a>
+        <a href="https://x.com/EntroProtocol" target="_blank" class="btn btn-secondary">Follow on X</a>
+        <a href="https://t.me/entro_protocol" target="_blank" class="btn btn-secondary">Join Telegram</a>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer>
+    <div class="footer-links">
+        <a href="https://github.com/EntroProtocol/efi-24d" target="_blank">GitHub</a>
+        <a href="https://x.com/EntroProtocol" target="_blank">X (Twitter)</a>
+        <a href="https://t.me/entro_protocol" target="_blank">Telegram</a>
+        <a href="#problem">Problem</a>
+        <a href="#dimensions">Dimensions</a>
+        <a href="#validation">Validation</a>
+        <a href="#tokenomics">Tokenomics</a>
+        <a href="#roadmap">Roadmap</a>
+    </div>
+    <div class="footer-copy">
+        © 2026 AEGIS by EntroProtocol. MIT Licensed. Built with mathematics, not marketing.
+    </div>
+</footer>
+
+</body>
+</html>
