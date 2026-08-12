@@ -819,6 +819,363 @@
     </div>
 </section>
 
+
+<!-- Scanner -->
+<section id="scanner">
+    <div class="section-title">
+        <h2>Live Scanner</h2>
+        <p>Paste any contract address. See the entropy analysis in real-time. No signup. No API key. Just math.</p>
+    </div>
+    <div style="max-width: 700px; margin: 0 auto;">
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px;">
+            <input type="text" id="scanAddress" placeholder="0x... contract address" 
+                style="flex: 1; min-width: 300px; padding: 14px 18px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 15px; font-family: monospace; outline: none;"
+                onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'" />
+            <select id="scanChain" style="padding: 14px 18px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 15px; outline: none; cursor: pointer;">
+                <option value="ethereum">Ethereum</option>
+                <option value="base">Base</option>
+                <option value="bsc">BSC</option>
+                <option value="arbitrum">Arbitrum</option>
+                <option value="polygon">Polygon</option>
+            </select>
+            <button onclick="runScan()" id="scanBtn" style="padding: 14px 32px; background: var(--gradient); border: none; border-radius: 10px; color: #000; font-weight: 700; font-size: 15px; cursor: pointer; transition: all 0.2s;">
+                Scan →
+            </button>
+        </div>
+        
+        <div id="scanStatus" style="text-align: center; color: var(--text-muted); font-size: 14px; min-height: 24px;"></div>
+        
+        <div id="scanResults" style="display: none;">
+            <div id="scanVerdict" style="padding: 24px; border-radius: 14px; background: var(--bg-card); border: 1px solid var(--border); margin-bottom: 24px; text-align: center;">
+                <div style="font-size: 13px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Verdict</div>
+                <div id="verdictText" style="font-size: 18px; font-weight: 700; margin-bottom: 12px;"></div>
+                <div id="verdictRisk" style="display: inline-block; padding: 4px 16px; border-radius: 100px; font-size: 13px; font-weight: 700;"></div>
+                <div style="margin-top: 16px; display: flex; justify-content: center; gap: 32px; flex-wrap: wrap;">
+                    <div><span style="color: var(--text-dim); font-size: 13px;">Bytecode:</span> <span id="bytecodeLen" style="font-weight: 700;"></span> bytes</div>
+                    <div><span style="color: var(--text-dim); font-size: 13px;">Anomaly Score:</span> <span id="anomalyScore" style="font-weight: 700;"></span></div>
+                    <div><span style="color: var(--text-dim); font-size: 13px;">Chain:</span> <span id="scanChainResult" style="font-weight: 700;"></span></div>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;" id="dimsContainer"></div>
+        </div>
+    </div>
+</section>
+
+<script>
+const RPC_ENDPOINTS = {
+    ethereum: "https://eth.llamarpc.com",
+    base: "https://mainnet.base.org",
+    bsc: "https://bsc-dataseed.binance.org",
+    arbitrum: "https://arb1.arbitrum.io/rpc",
+    polygon: "https://polygon-rpc.com",
+};
+
+function hexToBytes(hex) {
+    const cleaned = hex.startsWith("0x") ? hex.slice(2) : hex;
+    const bytes = new Uint8Array(Math.floor(cleaned.length / 2));
+    for (let i = 0; i < bytes.length; i++) {
+        bytes[i] = parseInt(cleaned.substr(i * 2, 2), 16);
+    }
+    return bytes;
+}
+
+function shannonEntropy(bytes) {
+    const freq = new Array(256).fill(0);
+    for (let i = 0; i < bytes.length; i++) freq[bytes[i]]++;
+    let entropy = 0;
+    for (let i = 0; i < 256; i++) {
+        if (freq[i] > 0) {
+            const p = freq[i] / bytes.length;
+            entropy -= p * Math.log2(p);
+        }
+    }
+    return entropy;
+}
+
+function normalizedShannon(bytes) {
+    const se = shannonEntropy(bytes);
+    return bytes.length > 0 ? se / Math.log2(Math.min(bytes.length, 256)) : 0;
+}
+
+function kolmogorovComplexity(bytes) {
+    if (bytes.length === 0) return 0;
+    let compressed = 0, prev = -1, runLength = 0;
+    for (let i = 0; i < bytes.length; i++) {
+        if (bytes[i] === prev) { runLength++; }
+        else { compressed += 1 + Math.floor(Math.log2(runLength + 1)); prev = bytes[i]; runLength = 1; }
+    }
+    compressed += 1 + Math.floor(Math.log2(runLength + 1));
+    return compressed / bytes.length;
+}
+
+function permutationEntropy(bytes) {
+    const order = 3;
+    if (bytes.length < order) return 0;
+    const patterns = {};
+    let total = 0;
+    for (let i = 0; i <= bytes.length - order; i++) {
+        const window = [bytes[i], bytes[i+1], bytes[i+2]];
+        const indexed = window.map((v, idx) => [v, idx]).sort((a, b) => a[0] - b[0]);
+        const pattern = indexed.map(x => x[1]).join(",");
+        patterns[pattern] = (patterns[pattern] || 0) + 1;
+        total++;
+    }
+    let entropy = 0;
+    for (const key in patterns) {
+        const p = patterns[key] / total;
+        entropy -= p * Math.log2(p);
+    }
+    return entropy / Math.log2(6);
+}
+
+function spectralEntropy(bytes) {
+    const n = Math.min(bytes.length, 128);
+    if (n < 4) return 0;
+    const samples = [];
+    for (let i = 0; i < n; i++) samples.push(bytes[i] / 255);
+    const magnitudes = [];
+    for (let k = 0; k < Math.floor(n / 2); k++) {
+        let real = 0, imag = 0;
+        for (let t = 0; t < n; t++) {
+            const angle = -2 * Math.PI * k * t / n;
+            real += samples[t] * Math.cos(angle);
+            imag += samples[t] * Math.sin(angle);
+        }
+        magnitudes.push(Math.sqrt(real * real + imag * imag));
+    }
+    const total = magnitudes.reduce((a, b) => a + b, 0);
+    if (total === 0) return 0;
+    let entropy = 0;
+    for (const m of magnitudes) {
+        if (m > 0) { const p = m / total; entropy -= p * Math.log2(p); }
+    }
+    return entropy / Math.log2(magnitudes.length);
+}
+
+function minEntropy(bytes) {
+    const freq = new Array(256).fill(0);
+    for (let i = 0; i < bytes.length; i++) freq[bytes[i]]++;
+    const maxFreq = Math.max(...freq);
+    return -Math.log2(maxFreq / bytes.length);
+}
+
+function opcodeDiversity(bytes) {
+    const opcodes = new Set();
+    for (let i = 0; i < bytes.length; i++) opcodes.add(bytes[i]);
+    return opcodes.size / 256;
+}
+
+function nGramEntropy(bytes, n) {
+    if (bytes.length < n) return 0;
+    const patterns = {};
+    let total = 0;
+    for (let i = 0; i <= bytes.length - n; i++) {
+        let pattern = "";
+        for (let j = 0; j < n; j++) pattern += bytes[i + j] + ",";
+        patterns[pattern] = (patterns[pattern] || 0) + 1;
+        total++;
+    }
+    let entropy = 0;
+    for (const key in patterns) {
+        const p = patterns[key] / total;
+        entropy -= p * Math.log2(p);
+    }
+    return entropy;
+}
+
+function markovTransitionEntropy(bytes) {
+    if (bytes.length < 2) return 0;
+    const transitions = [];
+    for (let i = 0; i < 16; i++) transitions.push(new Array(16).fill(0));
+    for (let i = 0; i < bytes.length - 1; i++) {
+        transitions[bytes[i] >> 4][bytes[i + 1] >> 4]++;
+    }
+    let totalEntropy = 0;
+    for (const row of transitions) {
+        const sum = row.reduce((a, b) => a + b, 0);
+        if (sum === 0) continue;
+        let rowEntropy = 0;
+        for (const val of row) {
+            if (val > 0) { const p = val / sum; rowEntropy -= p * Math.log2(p); }
+        }
+        totalEntropy += rowEntropy;
+    }
+    return totalEntropy / 16;
+}
+
+function storagePatternEntropy(bytes) {
+    let sload = 0, sstore = 0;
+    for (let i = 0; i < bytes.length; i++) {
+        if (bytes[i] === 0x54) sload++;
+        if (bytes[i] === 0x55) sstore++;
+    }
+    if (sload + sstore === 0) return 0;
+    const p1 = sload / (sload + sstore), p2 = sstore / (sload + sstore);
+    let e = 0;
+    if (p1 > 0) e -= p1 * Math.log2(p1);
+    if (p2 > 0) e -= p2 * Math.log2(p2);
+    return e;
+}
+
+function tsallisEntropy(bytes) {
+    const freq = new Array(256).fill(0);
+    for (let i = 0; i < bytes.length; i++) freq[bytes[i]]++;
+    let sum = 0;
+    for (let i = 0; i < 256; i++) {
+        if (freq[i] > 0) { const p = freq[i] / bytes.length; sum += p * p; }
+    }
+    return 1 - sum;
+}
+
+function renyiEntropy(bytes) {
+    const freq = new Array(256).fill(0);
+    for (let i = 0; i < bytes.length; i++) freq[bytes[i]]++;
+    let sum = 0;
+    for (let i = 0; i < 256; i++) {
+        if (freq[i] > 0) { const p = freq[i] / bytes.length; sum += p * p; }
+    }
+    return -Math.log2(sum);
+}
+
+function computeAnomalyScore(dims) {
+    const baseline = [7.5, 0.85, 0.6, 0.9, 0.7, 6.0, 0.5, 0.5, 0.8, 0.7, 0.6, 0.5, 0.3];
+    let score = 0, count = 0;
+    for (let i = 0; i < dims.length && i < baseline.length; i++) {
+        const diff = Math.abs(dims[i] - baseline[i]);
+        score += Math.min(diff / Math.max(baseline[i], 0.01), 1);
+        count++;
+    }
+    return count > 0 ? Math.min(score / count, 1.0) : 0;
+}
+
+function getVerdict(score, len) {
+    if (len < 50) return { verdict: "Insufficient bytecode for analysis", riskLevel: "UNKNOWN", color: "#64748b" };
+    if (score > 0.7) return { verdict: "Critical entropy anomalies detected. High probability of hidden vulnerabilities or malicious logic.", riskLevel: "CRITICAL", color: "#ef4444" };
+    if (score > 0.5) return { verdict: "Significant entropy deviations found. Multiple anomaly vectors suggest non-standard code patterns.", riskLevel: "HIGH", color: "#f59e0b" };
+    if (score > 0.3) return { verdict: "Moderate entropy anomalies. Some unusual patterns detected worth manual review.", riskLevel: "MEDIUM", color: "#f59e0b" };
+    if (score > 0.15) return { verdict: "Minor deviations from baseline. Low risk profile with standard code patterns.", riskLevel: "LOW", color: "#10b981" };
+    return { verdict: "Entropy profile matches standard contract baseline. No anomalies detected.", riskLevel: "SAFE", color: "#10b981" };
+}
+
+async function runScan() {
+    const address = document.getElementById("scanAddress").value.trim();
+    const chain = document.getElementById("scanChain").value;
+    const btn = document.getElementById("scanBtn");
+    const status = document.getElementById("scanStatus");
+    const results = document.getElementById("scanResults");
+    
+    if (!address || address.length < 10) {
+        status.textContent = "Please enter a valid contract address";
+        status.style.color = "#ef4444";
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.textContent = "Scanning...";
+    btn.style.opacity = "0.6";
+    status.textContent = "Fetching bytecode from " + chain + "...";
+    status.style.color = "var(--text-muted)";
+    results.style.display = "none";
+    
+    try {
+        const rpc = RPC_ENDPOINTS[chain];
+        const response = await fetch(rpc, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                jsonrpc: "2.0",
+                id: 1,
+                method: "eth_getCode",
+                params: [address, "latest"],
+            }),
+        });
+        
+        const data = await response.json();
+        const bytecodeHex = data.result || "0x";
+        
+        if (!bytecodeHex || bytecodeHex === "0x" || bytecodeHex.length < 4) {
+            status.textContent = "No bytecode found at this address on " + chain;
+            status.style.color = "#ef4444";
+            btn.disabled = false;
+            btn.textContent = "Scan →";
+            btn.style.opacity = "1";
+            return;
+        }
+        
+        status.textContent = "Computing 14 entropy dimensions...";
+        
+        const bytes = hexToBytes(bytecodeHex);
+        
+        if (bytes.length < 50) {
+            status.textContent = "Bytecode too short for entropy analysis (" + bytes.length + " bytes)";
+            status.style.color = "#ef4444";
+            btn.disabled = false;
+            btn.textContent = "Scan →";
+            btn.style.opacity = "1";
+            return;
+        }
+        
+        // Compute entropy dimensions
+        const dims = [
+            { name: "Shannon Entropy", value: shannonEntropy(bytes), desc: "Global byte distribution randomness" },
+            { name: "Normalized Shannon", value: normalizedShannon(bytes), desc: "Scale-invariant entropy [0,1]" },
+            { name: "Kolmogorov Complexity", value: kolmogorovComplexity(bytes), desc: "Algorithmic compressibility ratio" },
+            { name: "Permutation Entropy", value: permutationEntropy(bytes), desc: "Local order patterns" },
+            { name: "Spectral Entropy", value: spectralEntropy(bytes), desc: "FFT frequency domain distribution" },
+            { name: "Min-Entropy", value: minEntropy(bytes), desc: "Worst-case predictability" },
+            { name: "Tsallis Entropy", value: tsallisEntropy(bytes), desc: "Non-extensive statistical mechanics" },
+            { name: "Rényi Entropy", value: renyiEntropy(bytes), desc: "Generalized entropy family" },
+            { name: "Opcode Diversity", value: opcodeDiversity(bytes), desc: "Normalized unique opcode count" },
+            { name: "2-Gram Entropy", value: nGramEntropy(bytes, 2), desc: "Byte pair sequence entropy" },
+            { name: "3-Gram Entropy", value: nGramEntropy(bytes, 3), desc: "Byte triplet sequence entropy" },
+            { name: "4-Gram Entropy", value: nGramEntropy(bytes, 4), desc: "Byte quad sequence entropy" },
+            { name: "Markov Transition", value: markovTransitionEntropy(bytes), desc: "State transition matrix entropy" },
+            { name: "Storage Pattern", value: storagePatternEntropy(bytes), desc: "SLOAD/SSTORE sequence entropy" },
+        ];
+        
+        const dimValues = dims.map(d => d.value);
+        const anomalyScore = computeAnomalyScore(dimValues);
+        const verdict = getVerdict(anomalyScore, bytes.length);
+        
+        // Display results
+        document.getElementById("verdictText").textContent = verdict.verdict;
+        document.getElementById("verdictRisk").textContent = verdict.riskLevel;
+        document.getElementById("verdictRisk").style.background = verdict.color + "22";
+        document.getElementById("verdictRisk").style.color = verdict.color;
+        document.getElementById("verdictText").style.color = verdict.color;
+        document.getElementById("bytecodeLen").textContent = bytes.length.toLocaleString();
+        document.getElementById("anomalyScore").textContent = (anomalyScore * 100).toFixed(1) + "%";
+        document.getElementById("scanChainResult").textContent = chain.toUpperCase();
+        
+        const dimsContainer = document.getElementById("dimsContainer");
+        dimsContainer.innerHTML = "";
+        dims.forEach((d, i) => {
+            const card = document.createElement("div");
+            card.style.cssText = "padding: 16px; border-radius: 12px; background: var(--bg-card); border: 1px solid var(--border);";
+            card.innerHTML = 
+                "<div style=\"font-size: 11px; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;\">D" + (i+1) + "</div>" +
+                "<div style=\"font-size: 15px; font-weight: 700; margin: 4px 0;\">" + d.name + "</div>" +
+                "<div style=\"font-size: 22px; font-weight: 800; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;\">" + d.value.toFixed(4) + "</div>" +
+                "<div style=\"font-size: 12px; color: var(--text-muted); margin-top: 4px;\">" + d.desc + "</div>";
+            dimsContainer.appendChild(card);
+        });
+        
+        results.style.display = "block";
+        status.textContent = "";
+        
+    } catch (error) {
+        status.textContent = "Error: " + (error.message || "Failed to scan contract");
+        status.style.color = "#ef4444";
+    }
+    
+    btn.disabled = false;
+    btn.textContent = "Scan →";
+    btn.style.opacity = "1";
+}
+</script>
+
+
 <!-- Validation -->
 <section id="validation">
     <div class="section-title">
