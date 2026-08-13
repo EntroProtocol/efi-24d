@@ -1,13 +1,13 @@
-# EFI 24D v4.0 — Entropy Forensics Engine
+# AEGIS — Entropy Forensics Engine
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB.svg)](https://python.org)
 [![p-value](https://img.shields.io/badge/p--value-1.64e--7-success.svg)](#validation)
 [![Dimensions](https://img.shields.io/badge/Entropy%20Dimensions-24-critical.svg)](#the-24-entropy-dimensions)
 
-**EFI 24D** is the world's first content-agnostic smart contract vulnerability detection engine. It analyzes bytecode across **24 orthogonal entropy dimensions** to detect zero-day vulnerabilities — **without reading source code, without pattern matching, without rule databases**.
+**AEGIS** is the world's first content-agnostic smart contract vulnerability detection engine. It analyzes bytecode across **24 orthogonal entropy dimensions** to detect zero-day vulnerabilities — **without reading source code, without pattern matching, without rule databases**.
 
-Traditional security tools (Slither, Mythril, Securify) use rule-based pattern matching — they only find vulnerabilities they've already seen. EFI 24D uses **mathematical entropy analysis** to find vulnerabilities nobody has ever seen before.
+Traditional security tools (Slither, Mythril, Securify) use rule-based pattern matching — they only find vulnerabilities they've already seen. AEGIS uses **mathematical entropy analysis** to find vulnerabilities nobody has ever seen before.
 
 ---
 
@@ -15,7 +15,7 @@ Traditional security tools (Slither, Mythril, Securify) use rule-based pattern m
 
 Every compiled smart contract has a deterministic distribution of opcodes, function selectors, memory allocations, and execution paths. When developers write safe code, it creates natural entropy patterns. When vulnerabilities exist (reentrancy, delegatecall abuse, storage collisions, access control flaws), they introduce **geometric perturbations** in the bytecode's information structure.
 
-EFI 24D measures these perturbations across 24 mathematical dimensions — building a "mathematical DNA" profile for each contract. Contracts that deviate significantly from safe baseline distributions are flagged as anomalous.
+AEGIS measures these perturbations across 24 mathematical dimensions — building a "mathematical DNA" profile for each contract. Contracts that deviate significantly from safe baseline distributions are flagged as anomalous.
 
 ```
 Raw Bytecode → EVM Disassembly → 24D Entropy Extraction → ML Anomaly Detection → Threat Score
@@ -97,7 +97,7 @@ Raw Bytecode → EVM Disassembly → 24D Entropy Extraction → ML Anomaly Detec
 
 ## Machine Learning Anomaly Detection
 
-EFI 24D includes an **Isolation Forest** ML model trained on 73 smart contracts:
+AEGIS includes an **Isolation Forest** ML model trained on 73 smart contracts:
 - Learns normal entropy distributions across all 24 dimensions
 - Flags contracts that deviate significantly from baseline
 - Provides continuous anomaly score [0, 1]
@@ -147,10 +147,10 @@ scikit-learn
 efi-24d/
 ├── README.md              # This file
 ├── LICENSE                # MIT License
-├── efi_24d.py             # Core EFI 24D engine (PoC)
+├── efi_24d.py             # Core AEGIS EFI engine (PoC)
 ├── docs/
-│   ├── DIMENSIONS.md      # Detailed math for each dimension
-│   └── METHODOLOGY.md     # How entropy analysis works
+│   ├── litepaper.md       # AEGIS Litepaper v1.0
+│   └── index.html         # AEGIS website (legalnode.uk)
 ├── poc/
 │   └── EXPERIMENTS.md     # 16 experiment descriptions & results
 └── results/
@@ -163,19 +163,19 @@ efi-24d/
 
 | Phase | Status | Description |
 |:------|:------:|:------------|
-| Phase 1: EFI Engine (6D) | ✅ Done | Core 6 entropy dimensions |
+| Phase 1: EFI Engine Core | ✅ Done | Core 6 entropy dimensions |
 | Phase 2: EFI 18D Elite | ✅ Done | 12 additional statistical physics dimensions |
 | Phase 3: EFI 24D Brutal | ✅ Done | 6 revolutionary dimensions + ML anomaly detection |
-| Phase 4: Rust Core | 🔄 In Progress | Production Rust implementation with CUDA |
-| Phase 5: FastAPI + SDK | 📋 Planned | REST API and Python SDK |
-| Phase 6: Web Dashboard | 📋 Planned | Real-time scanning dashboard |
-| Phase 7: B2B SaaS | 📋 Planned | Enterprise API launch |
+| Phase 4: $AEGIS Token Launch | 🔄 In Progress | Fair launch on Solana via Pump.fun |
+| Phase 5: Rust Production Core | 📋 Planned | Production Rust implementation with CUDA acceleration |
+| Phase 6: FastAPI + SDK | 📋 Planned | REST API and Python SDK for B2B clients |
+| Phase 7: B2B SaaS Launch | 📋 Planned | Enterprise security platform. $500-$2,000/month per client |
 
 ---
 
-## How EFI Differs from Traditional Tools
+## How AEGIS Differs from Traditional Tools
 
-| Feature | Slither / Mythril | **EFI 24D** |
+| Feature | Slither / Mythril | **AEGIS** |
 |:--------|:-----------------|:-----------|
 | Method | Rule-based pattern matching | **Mathematical entropy analysis** |
 | Source code | Required | **Not required** |
@@ -187,16 +187,32 @@ efi-24d/
 
 ---
 
+## Tokenomics
+
+| Parameter | Value |
+|:----------|:------|
+| Symbol | AEGIS |
+| Blockchain | Solana |
+| Total Supply | 1,000,000,000 (1B) |
+| Launch Method | Fair Launch (Pump.fun) |
+| Team Allocation | 0% |
+| Revenue Model | B2B SaaS + DeSci Grants |
+| Deflation | 100% Revenue → Buy-back & Burn |
+
+---
+
 ## Links
 
+- **Website**: [legalnode.uk](https://legalnode.uk)
+- **Live Scanner**: [legalnode.uk](https://legalnode.uk)
 - **X (Twitter)**: [@EntroProtocol](https://x.com/EntroProtocol)
-- **Telegram**: [t.me/entro_protocol](https://t.me/entro_protocol)
+- **Litepaper**: [docs/litepaper.md](docs/litepaper.md)
 
 ---
 
 ## License
 
-Proof of concept code is released under the [MIT License](LICENSE). The production EFI Engine core (Rust + PyTorch/CUDA), ML model weights, and 24D feature extraction pipeline remain proprietary.
+Proof of concept code is released under the [MIT License](LICENSE). The production AEGIS EFI Engine core (Rust + PyTorch/CUDA), ML model weights, and 24D feature extraction pipeline remain proprietary.
 
 ---
 
