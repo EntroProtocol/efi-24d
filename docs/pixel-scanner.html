@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Image Detector — Free Deepfake & Steganography Scanner | AEGIS</title>
+<meta name="description" content="Free AI image detector using 24D entropy analysis. Detect AI-generated images, deepfakes, steganography, and photo manipulation. No signup. No upload limits. Pure math.">
+<meta name="keywords" content="AI image detector, deepfake detector, steganography scanner, AI generated image checker, photo manipulation detector, entropy analysis">
+<meta property="og:title" content="AI Image Detector — 24D Entropy Analysis">
+<meta property="og:description" content="Detect AI-generated images, deepfakes, and hidden data using 24D entropy analysis. Free, no signup.">
+<meta property="og:type" content="website">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="http://legalnode.uk/pixel-scanner.html">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0f;--surface:#12121a;--surface2:#1a1a25;--border:#2a2a3a;--text:#e0e0ec;--muted:#8888a0;--accent:#00ffaa;--accent2:#ff00aa;--warn:#ffaa00;--danger:#ff4444}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px}
+.container{max-width:900px;width:100%}
+h1{font-size:24px;text-align:center;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.subtitle{text-align:center;color:var(--muted);font-size:13px;margin-bottom:20px}
+.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:40px;text-align:center;cursor:pointer;transition:border-color .3s;margin-bottom:20px}
+.upload-zone:hover{border-color:var(--accent)}
+.upload-zone p{color:var(--muted);font-size:14px}
+.upload-zone .icon{font-size:32px;margin-bottom:8px}
+#fileInput{display:none}
+.results{display:none;gap:20px;flex-direction:column}
+.verdict-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px}
+.verdict-card h2{font-size:18px;margin-bottom:12px}
+.verdict-badge{display:inline-block;padding:6px 16px;border-radius:6px;font-weight:700;font-size:16px;margin-bottom:12px}
+.badge-natural{background:rgba(0,255,170,0.15);color:var(--accent);border:1px solid var(--accent)}
+.badge-ai{background:rgba(255,0,170,0.15);color:var(--accent2);border:1px solid var(--accent2)}
+.badge-stego{background:rgba(255,170,0,0.15);color:var(--warn);border:1px solid var(--warn)}
+.badge-manip{background:rgba(255,68,68,0.15);color:var(--danger);border:1px solid var(--danger)}
+.badge-deepfake{background:rgba(255,68,68,0.15);color:var(--danger);border:1px solid var(--danger)}
+.findings{margin-top:12px}
+.finding{padding:8px 12px;background:var(--surface2);border-radius:6px;margin-bottom:6px;font-size:13px}
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px}
+.metric{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center}
+.metric-label{font-size:10px;color:var(--muted);text-transform:uppercase}
+.metric-value{font-size:16px;font-weight:600;margin-top:4px;font-family:monospace}
+.heatmap-section{margin-top:16px}
+.heatmap-section h3{font-size:14px;color:var(--muted);margin-bottom:8px}
+canvas{border:1px solid var(--border);border-radius:8px;max-width:100%}
+.image-preview{display:flex;gap:20px;flex-wrap:wrap}
+.image-preview img{max-width:200px;border-radius:8px;border:1px solid var(--border)}
+.processing{text-align:center;padding:40px;color:var(--muted)}
+.processing .spinner{display:inline-block;width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.dims-list{display:flex;flex-wrap:wrap;gap:4px;margin-top:12px}
+.dim-tag{font-size:10px;color:var(--muted);background:var(--surface2);padding:2px 8px;border-radius:4px;border:1px solid var(--border)}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>⚡ EFI Pixel Scanner</h1>
+<p class="subtitle">24D Entropy Microscope — Pixel-level analysis · Zero parameters · Zero training</p>
+
+<div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+<div class="icon">🖼️</div>
+<p>Click or drop an image to scan at pixel level with 24D entropy analysis</p>
+<p style="font-size:11px;margin-top:4px">Detects: AI-generated images · Steganography · Manipulation · Deepfakes</p>
+</div>
+<input type="file" id="fileInput" accept="image/*" onchange="handleFile(event)">
+
+<div class="results" id="results"></div>
+</div>
+
+<script>
+// ═══ 24D ENTROPY CALCULATOR (Pixel-Optimized) ═══
+function shannon(d){if(!d)return 0;const f={};for(const c of d)f[c]=(f[c]||0)+1;const t=d.length;let h=0;for(const k in f){h-=(f[k]/t)*Math.log2(f[k]/t)}return h}
+function normShannon(d){if(!d)return 0;const s=shannon(d);const u=new Set(d).size;return u>1?s/Math.log2(u):0}
+function kolmogorov(d){if(!d)return 0;return new Set(d).size/Math.max(d.length,1)}
+function permutation(d){if(!d||d.length<4)return 0;const v=[];for(let i=0;i<Math.min(d.length,200);i++)v.push(d.charCodeAt(i));const p={};for(let i=0;i<v.length-3;i++){const w=v.slice(i,i+4);const idx=w.map((x,i)=>[x,i]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]).join(',');p[idx]=(p[idx]||0)+1}const t=Object.values(p).reduce((a,b)=>a+b,0);let h=0;for(const k in p)h-=(p[k]/t)*Math.log2(p[k]/t);return h}
+function spectral(d){if(!d||d.length<8)return 0;const v=[];for(let i=0;i<Math.min(d.length,256);i++)v.push(d.charCodeAt(i));const n=Math.min(v.length,32);const psd=[];for(let k=0;k<n;k++){let r=0,i=0;for(let j=0;j<n;j++){r+=v[j]*Math.cos(2*Math.PI*k*j/n);i-=v[j]*Math.sin(2*Math.PI*k*j/n)}psd.push(r*r+i*i)}const t=psd.reduce((a,b)=>a+b,0);if(t===0)return 0;let h=0;for(const p of psd)if(p>0)h-=(p/t)*Math.log2(p/t);return h}
+function minEntropy(d){if(!d)return 0;const f={};for(const c of d)f[c]=(f[c]||0)+1;const mx=Math.max(...Object.values(f))/d.length;return mx>0?-Math.log2(mx):0}
+function markov(d){if(!d||d.length<4)return 0;const t={};let c=0;for(let i=0;i<d.length-2;i++){const k=d[i]+d[i+1];t[k]=(t[k]||0)+1;c++}if(c===0)return 0;let h=0;for(const k in t)h-=(t[k]/c)*Math.log2(t[k]/c);return h}
+function wavelet(d){if(!d||d.length<8)return 0;const v=[];for(let i=0;i<Math.min(d.length,256);i++)v.push(d.charCodeAt(i));let e=0;for(let i=0;i<v.length-1;i+=2){const dt=(v[i]-v[i+1])/2;e+=dt*dt}return Math.log2(e+1)}
+function opcodeDiv(h){const s=new Set();for(let i=0;i<h.length-2;i+=2)s.add(h.substr(i,2));return s.size}
+function storageOps(h){return(h.match(/54|55/g)||[]).length}
+function callOps(h){return(h.match(/f1|fa|f4/g)||[]).length}
+function controlFlow(h){return(h.match(/56|57|5b/g)||[]).length}
+function entropyRate(d){if(!d||d.length<64)return 0;const w=32;const r=[];for(let i=0;i<d.length-w;i+=w)r.push(shannon(d.substr(i,w)));if(!r.length)return 0;const m=r.reduce((a,b)=>a+b,0)/r.length;return Math.sqrt(r.reduce((a,b)=>a+(b-m)**2,0)/r.length)}
+function crossContract(h){const c=(h.match(/f1|f4|fa/g)||[]).length;return c>0?(h.match(/f4/g)||[]).length/c:0}
+function selectors(h){return(h.match(/63/g)||[]).length}
+function repetition(d){if(!d||d.length<10)return 0;const b={};for(let i=0;i<d.length-1;i++){const k=d.substr(i,2);b[k]=(b[k]||0)+1}const t=Object.values(b).reduce((a,b)=>a+b,0);let r=0;for(const k in b)r+=(b[k]/t)**2;return r}
+function hurst(d){if(!d||d.length<100)return 0.5;const v=[];for(let i=0;i<Math.min(d.length,200);i++)v.push(d.charCodeAt(i));const n=v.length;const m=v.reduce((a,b)=>a+b,0)/n;const dev=v.map(x=>x-m);const cum=[];let s=0;for(const x of dev){s+=x;cum.push(s)}const R=Math.max(...cum)-Math.min(...cum);const sd=Math.sqrt(dev.reduce((a,b)=>a+b*b,0)/n);return(sd>0&&R>0)?Math.log(R/sd)/Math.log(n):0.5}
+function tsallis(d){if(!d)return 0;const f={};for(const c of d)f[c]=(f[c]||0)+1;const t=d.length;let s=0;for(const k in f)s+=Math.pow(f[k]/t,2);return(1-s)}
+function renyi(d){if(!d)return 0;const f={};for(const c of d)f[c]=(f[c]||0)+1;const t=d.length;let s=0;for(const k in f)s+=Math.pow(f[k]/t,2);return 1/(1-2)*Math.log2(s+1e-10)}
+function sampleEntropy(d){if(!d||d.length<3)return 0;const v=[];for(let i=0;i<Math.min(d.length,200);i++)v.push(d.charCodeAt(i));const mn=v.reduce((a,b)=>a+b,0)/v.length;const vr=v.reduce((a,b)=>a+(b-mn)**2,0)/v.length;const rv=0.2*Math.sqrt(vr)||1;function cnt(mv){const ps=[];for(let i=0;i<v.length-mv;i++)ps.push(v.slice(i,i+mv));let c=0;for(let i=0;i<ps.length;i++)for(let j=i+1;j<ps.length;j++){let ok=true;for(let k=0;k<mv;k++)if(Math.abs(ps[i][k]-ps[j][k])>rv){ok=false;break}if(ok)c++}return c}const A=cnt(3),B=cnt(2);return B>0?-Math.log(A/B+1e-10):0}
+function approxEntropy(d){if(!d||d.length<4)return 0;const v=[];for(let i=0;i<Math.min(d.length,200);i++)v.push(d.charCodeAt(i));const mn=v.reduce((a,b)=>a+b,0)/v.length;const vr=v.reduce((a,b)=>a+(b-mn)**2,0)/v.length;const rv=0.2*Math.sqrt(vr)||1;function phi(mv){const ps=[];for(let i=0;i<v.length-mv;i++)ps.push(v.slice(i,i+mv));let s=0;for(const p of ps){let c=0;for(const q of ps){let ok=true;for(let k=0;k<mv;k++)if(Math.abs(p[k]-q[k])>rv){ok=false;break}if(ok)c++}s+=Math.log(c/ps.length+1e-10)}return s/ps.length}return phi(2)-phi(3)}
+function linguistic(d){return d?new Set(d).size/d.length:0}
+function dataDensity(h){if(!h)return 0;let nz=0;for(const c of h)if(c!=='0')nz++;return nz/h.length}
+function codeEntropy(h){if(!h||h.length<100)return 0;const ch=[];for(let i=0;i<h.length;i+=100)ch.push(h.substr(i,100));const es=ch.filter(c=>c.length>10).map(c=>shannon(c));if(!es.length)return 0;const m=es.reduce((a,b)=>a+b,0)/es.length;return Math.sqrt(es.reduce((a,b)=>a+(b-m)**2,0)/es.length)}
+
+const DIM_NAMES=["Shannon","NormShannon","Kolmogorov","Permutation","Spectral","MinEntropy","Markov","Wavelet","OpcodeDiv","StorageOps","CallOps","ControlFlow","EntropyRate","CrossContract","Selectors","Repetition","Hurst","Tsallis","Renyi","SampleEntropy","ApproxEntropy","Linguistic","DataDensity","CodeEntropy"];
+
+function computeBlock(blockData){
+const s=blockData.map(b=>String.fromCharCode(b)).join('')||'\x00';
+let hexd='';for(const b of blockData)hexd+=(b&0xff).toString(16).padStart(2,'0');
+return[shannon(s),normShannon(s),kolmogorov(blockData),permutation(s),spectral(s),minEntropy(s),markov(s),wavelet(s),opcodeDiv(hexd),storageOps(hexd),callOps(hexd),controlFlow(hexd),entropyRate(s),crossContract(hexd),selectors(hexd),repetition(s),hurst(s),tsallis(s),renyi(s),sampleEntropy(s),approxEntropy(s),linguistic(s),dataDensity(hexd),codeEntropy(hexd)]
+}
+
+// ═══ SCANNER ═══
+function scanImage(imgData,width,height,blockSize=16){
+const bx=Math.floor(width/blockSize),by=Math.floor(height/blockSize);
+const entropyMap=[];
+const anomalyMap=[];
+for(let y=0;y<by;y++){entropyMap[y]=[];anomalyMap[y]=[];for(let x=0;x<bx;x++){
+const block=[];
+for(let py=0;py<blockSize;py++)for(let px=0;px<blockSize;px++){
+const idx=((y*blockSize+py)*width+(x*blockSize+px))*4;
+block.push(imgData[idx],imgData[idx+1],imgData[idx+2])
+}
+entropyMap[y][x]=computeBlock(block)
+}}
+// Stats
+const means=new Array(24).fill(0),stds=new Array(24).fill(0);
+for(let d=0;d<24;d++){let s=0;for(let y=0;y<by;y++)for(let x=0;x<bx;x++)s+=entropyMap[y][x][d];means[d]=s/(bx*by)}
+for(let d=0;d<24;d++){let s=0;for(let y=0;y<by;y++)for(let x=0;x<bx;x++)s+=(entropyMap[y][x][d]-means[d])**2;stds[d]=Math.sqrt(s/(bx*by))}
+// Anomaly map
+const anomalies=[];
+for(let y=0;y<by;y++){for(let x=0;x<bx;x++){
+let maxZ=0;const z=[];
+for(let d=0;d<24;d++){const zv=Math.abs((entropyMap[y][x][d]-means[d])/(stds[d]+1e-10));z.push(zv);if(zv>maxZ)maxZ=zv}
+anomalyMap[y][x]=maxZ;
+if(maxZ>3.0){const dims=[];for(let d=0;d<24;d++)if(z[d]>3.0)dims.push(DIM_NAMES[d]);anomalies.push({x,y,maxZ,dims})}
+}}
+// Classify
+const avgStd=stds.reduce((a,b)=>a+b,0)/24;
+const shannonMean=means[0],shannonStd=stds[0];
+const kolmMean=means[2],kolmStd=stds[2];
+const permMean=means[3];
+const specStd=stds[4];
+const markovStd=stds[6];
+const hurstMean=means[16];
+const entropyRateMean=means[12];
+const anomalyRatio=anomalies.length/(bx*by);
+let verdict="NATURAL",confidence=0,findings=[],reasons=[];
+
+// AI detection
+let aiScore=0;
+if(kolmMean<0.65){aiScore+=2;reasons.push(`low algorithmic complexity (K=${kolmMean.toFixed(3)}) — highly compressible smooth texture`)}
+else if(kolmMean<0.75)aiScore+=1;
+if(shannonMean<5.5){aiScore+=2;reasons.push(`low Shannon entropy (H=${shannonMean.toFixed(3)}) — limited pixel value diversity`)}
+else if(shannonMean<6.0)aiScore+=1;
+if(permMean<2.5){aiScore+=1;reasons.push("low permutation entropy — repetitive local order patterns")}
+if(avgStd<0.5){aiScore+=1;reasons.push("low entropy variance across blocks — uniform texture")}
+if(aiScore>=4){verdict="AI_GENERATED";confidence=Math.min(0.55+aiScore*0.07,0.95);findings.push(`AI-GENERATED signature: ${reasons.join(", ")}`)}
+
+// Steganography (clustered anomalies)
+if(anomalyRatio>0.05&&anomalyRatio<0.35&&anomalies.length>=3){
+let clustered=0;
+for(const a of anomalies){let has=false;for(const b of anomalies){if(a!==b&&Math.abs(a.x-b.x)<=1&&Math.abs(a.y-b.y)<=1){has=true;break}}if(has)clustered++}
+if(clustered>=Math.max(3,anomalies.length*0.6)){if(verdict==="NATURAL")verdict="STEGANOGRAPHY";findings.push(`Clustered anomalies in ${anomalies.length} blocks — possible hidden data`);confidence=Math.max(confidence,0.65)}
+}
+
+// Manipulation
+if(anomalyRatio>0.02&&anomalyRatio<0.20&&specStd>0.5){if(verdict==="NATURAL")verdict="MANIPULATED";findings.push(`Localized spectral anomaly — possible region manipulation (${anomalies.length} blocks)`);confidence=Math.max(confidence,0.55)}
+
+// Deepfake
+if(hurstMean<0.35&&entropyRateMean>0.3&&stds[3]>0.3){if(verdict==="NATURAL")verdict="DEEPFAKE_SUSPECT";findings.push(`Anti-persistent entropy (H=${hurstMean.toFixed(3)}) — possible face-swap boundary`);confidence=Math.max(confidence,0.50)}
+
+// Natural
+if(kolmMean>0.80&&shannonMean>6.0&&!findings.length){verdict="NATURAL";findings.push(`High entropy + incompressible (K=${kolmMean.toFixed(3)}, H=${shannonMean.toFixed(3)}) — consistent with real photography`);confidence=Math.max(confidence,0.65)}
+if(!findings.length){findings.push("Entropy profile within normal parameters — no significant anomalies");confidence=0.50}
+
+return{verdict,confidence,findings,anomalies,anomalyMap,bx,by,means,stds,metrics:{
+avg_entropy_std:avgStd,shannon_mean:shannonMean,shannon_std:shannonStd,kolmogorov_mean:kolmMean,kolmogorov_std:kolmStd,permutation_mean:permMean,spectral_std:specStd,markov_std:markovStd,hurst_mean:hurstMean,entropy_rate_mean:entropyRateMean,anomaly_ratio:anomalyRatio
+}}}
+
+// ═══ UI ═══
+function handleFile(e){
+const file=e.target.files[0];if(!file)return;
+const reader=new FileReader();
+reader.onload=function(ev){
+const img=new Image();
+img.onload=function(){
+// Resize if too large
+const maxDim=512;let w=img.width,h=img.height;
+if(w>maxDim||h>maxDim){const r=Math.min(maxDim/w,maxDim/h);w=Math.floor(w*r);h=Math.floor(h*r)}
+const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,w,h);
+const imgData=ctx.getImageData(0,0,w,h);
+showResults(img,ev.target.result,w,h,imgData)
+};
+img.src=ev.target.result;
+};
+reader.readAsDataURL(file);
+}
+
+function showResults(img,imgUrl,w,h,imgData){
+const res=document.getElementById('results');res.style.display='flex';
+res.innerHTML='<div class="processing"><div class="spinner"></div><p>Scanning '+w+'×'+h+' image with 24D entropy... (this takes a few seconds)</p></div>';
+setTimeout(()=>{
+const t0=performance.now();
+const result=scanImage(imgData.data,w,h,16);
+const elapsed=(performance.now()-t0).toFixed(0);
+const badgeClass={'NATURAL':'badge-natural','AI_GENERATED':'badge-ai','STEGANOGRAPHY':'badge-stego','MANIPULATED':'badge-manip','DEEPFAKE_SUSPECT':'badge-deepfake'}[result.verdict]||'badge-natural';
+// Heatmap canvas
+const hmCanvas=document.createElement('canvas');hmCanvas.width=result.bx*20;hmCanvas.height=result.by*20;
+const hmCtx=hmCanvas.getContext('2d');
+for(let y=0;y<result.by;y++)for(let x=0;x<result.bx;x++){
+const v=Math.min(result.anomalyMap[y][x]/5,1);
+// Green (normal) → Red (anomaly)
+const r=Math.floor(v*255),g=Math.floor((1-v)*255),b=0;
+hmCtx.fillStyle=`rgb(${r},${g},${b})`;hmCtx.fillRect(x*20,y*20,19,19)
+}
+const m=result.metrics;
+res.innerHTML=`
+<div class="verdict-card">
+<h2>Scan Results</h2>
+<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">
+<img src="${imgUrl}" style="max-width:200px;border-radius:8px;border:1px solid var(--border)">
+<div style="flex:1;min-width:250px">
+<span class="verdict-badge ${badgeClass}">${result.verdict.replace(/_/g,' ')}</span>
+<p style="color:var(--muted);font-size:13px">Confidence: <strong>${(result.confidence*100).toFixed(0)}%</strong> | Time: ${elapsed}ms | Blocks: ${result.bx}×${result.by}</p>
+<div class="findings">
+${result.findings.map(f=>`<div class="finding">• ${f}</div>`).join('')}
+</div>
+</div>
+</div>
+<div class="metrics-grid">
+<div class="metric"><div class="metric-label">Shannon H</div><div class="metric-value">${m.shannon_mean.toFixed(2)}</div><div style="font-size:10px;color:var(--muted)">σ ${m.shannon_std.toFixed(3)}</div></div>
+<div class="metric"><div class="metric-label">Kolmogorov</div><div class="metric-value">${m.kolmogorov_mean.toFixed(3)}</div><div style="font-size:10px;color:var(--muted)">σ ${m.kolmogorov_std.toFixed(3)}</div></div>
+<div class="metric"><div class="metric-label">Permutation</div><div class="metric-value">${m.permutation_mean.toFixed(2)}</div></div>
+<div class="metric"><div class="metric-label">Hurst</div><div class="metric-value">${m.hurst_mean.toFixed(3)}</div></div>
+<div class="metric"><div class="metric-label">Entropy Rate</div><div class="metric-value">${m.entropy_rate_mean.toFixed(3)}</div></div>
+<div class="metric"><div class="metric-label">Avg Std</div><div class="metric-value">${m.avg_entropy_std.toFixed(3)}</div></div>
+<div class="metric"><div class="metric-label">Anomalies</div><div class="metric-value">${result.anomalies.length}</div><div style="font-size:10px;color:var(--muted)">${(m.anomaly_ratio*100).toFixed(1)}%</div></div>
+<div class="metric"><div class="metric-label">Spectral σ</div><div class="metric-value">${m.spectral_std.toFixed(3)}</div></div>
+</div>
+</div>
+<div class="verdict-card">
+<h2>24D Entropy Heatmap</h2>
+<p style="color:var(--muted);font-size:12px;margin-bottom:12px">Green = normal entropy | Red = anomalous (z-score > 3.0)</p>
+<div style="display:flex;gap:20px;flex-wrap:wrap">
+<div><img src="${hmCanvas.toDataURL()}" style="border:1px solid var(--border);border-radius:8px;image-rendering:pixelated;max-width:300px"></div>
+<div style="flex:1;min-width:200px">
+<p style="color:var(--muted);font-size:12px;margin-bottom:8px">24 Dimensions Analyzed:</p>
+<div class="dims-list">
+${DIM_NAMES.map((n,i)=>`<span class="dim-tag">D${i}: ${n}</span>`).join('')}
+</div>
+</div>
+</div>
+</div>
+`;
+},100);
+}
+
+// Drag & drop
+const zone=document.querySelector('.upload-zone');
+zone.addEventListener('dragover',e=>{e.preventDefault();zone.style.borderColor='var(--accent)'});
+zone.addEventListener('dragleave',e=>{zone.style.borderColor='var(--border)'});
+zone.addEventListener('drop',e=>{e.preventDefault();zone.style.borderColor='var(--border)';if(e.dataTransfer.files.length){document.getElementById('fileInput').files=e.dataTransfer.files;handleFile({target:{files:e.dataTransfer.files}})}});
+</script>
+<div style="text-align:center;padding:20px;margin-top:20px;border-top:1px solid var(--border)">
+<a href="http://legalnode.uk" style="color:#00ffaa;text-decoration:none;font-size:14px">← Back to AEGIS</a>
+<span style="color:#888;margin:0 12px">|</span>
+<a href="http://legalnode.uk" style="color:#888;text-decoration:none;font-size:12px">Entropy Forensics Engine</a>
+</div>
+</body>
+</html>

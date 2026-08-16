@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: http://legalnode.uk/sitemap.xml

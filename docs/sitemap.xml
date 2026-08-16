@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>http://legalnode.uk/analysis/sol-solana.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>http://legalnode.uk/analysis/usdc-solana.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>http://legalnode.uk/analysis/jup-solana.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>http://legalnode.uk/analysis/wif-solana.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>http://legalnode.uk/analysis/bonk-solana.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>http://legalnode.uk/analysis/pyth-solana.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>http://legalnode.uk/analysis/jto-solana.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>http://legalnode.uk/analysis/ray-solana.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>http://legalnode.uk/analysis/orca-solana.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>http://legalnode.uk/analysis/mngo-solana.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>http://legalnode.uk/analysis/eth-ethereum.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>http://legalnode.uk/analysis/usdc-ethereum.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>http://legalnode.uk/analysis/uni-ethereum.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>http://legalnode.uk/analysis/aave-ethereum.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>http://legalnode.uk/analysis/link-ethereum.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>http://legalnode.uk</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>http://legalnode.uk/pixel-scanner.html</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+</urlset>
