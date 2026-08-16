@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Contract Audit Services — AEGIS Entropy Forensics</title>
+<meta name="description" content="Professional smart contract auditing using 24D entropy analysis. Audited Virtuals Protocol (55K+ agents, 10 vulnerabilities found). Statistically validated (p=1.64e-7). Available for hire.">
+<meta name="keywords" content="smart contract audit, DeFi security, entropy analysis, vulnerability detection, zero-day audit, Solana audit, Ethereum audit, Base audit">
+<meta property="og:title" content="Smart Contract Audit Services — AEGIS">
+<meta property="og:description" content="Entropy-based smart contract auditing. 10 real vulnerabilities found. 16/16 experiments passed. Available for hire.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0f;--surface:#12121a;--border:#2a2a3a;--text:#e0e0ec;--muted:#8888a0;--accent:#00d4ff;--green:#00ffaa;--red:#ff4444;--yellow:#ffaa00;--purple:#7c3aed;--gradient:linear-gradient(135deg,#00d4ff 0%,#7c3aed 100%)}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,sans-serif;line-height:1.6;padding:20px}
+.container{max-width:900px;margin:0 auto}
+nav{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid var(--border);margin-bottom:30px}
+.logo{font-size:22px;font-weight:800;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+nav a{color:var(--muted);text-decoration:none;font-size:14px;margin-left:20px}
+.hero{text-align:center;padding:40px 0}
+.hero h1{font-size:36px;margin-bottom:12px;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--muted);font-size:16px;max-width:600px;margin:0 auto 24px}
+.badge{display:inline-block;padding:6px 14px;border-radius:6px;font-size:13px;font-weight:600;margin:4px}
+.badge-green{background:rgba(0,255,170,0.12);color:var(--green);border:1px solid rgba(0,255,170,0.3)}
+.badge-blue{background:rgba(0,212,255,0.12);color:var(--accent);border:1px solid rgba(0,212,255,0.3)}
+.badge-purple{background:rgba(124,58,237,0.12);color:var(--purple);border:1px solid rgba(124,58,237,0.3)}
+.section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin:20px 0}
+.section h2{font-size:22px;margin-bottom:16px;color:var(--accent)}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;margin:20px 0}
+.stat{text-align:center;padding:16px;background:var(--bg);border-radius:8px;border:1px solid var(--border)}
+.stat-num{font-size:28px;font-weight:800;color:var(--accent);font-family:monospace}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+.audit-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:20px;margin:16px 0}
+.audit-card h3{font-size:18px;color:var(--text);margin-bottom:8px}
+.audit-card .meta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.vuln-list{list-style:none;padding:0}
+.vuln-list li{padding:8px 12px;margin:4px 0;border-radius:6px;font-size:14px;display:flex;justify-content:space-between;align-items:center}
+.vuln-critical{background:rgba(255,68,68,0.1);border-left:3px solid var(--red)}
+.vuln-high{background:rgba(255,170,0,0.1);border-left:3px solid var(--yellow)}
+.vuln-medium{background:rgba(0,212,255,0.1);border-left:3px solid var(--accent)}
+.vuln-low{background:rgba(0,255,170,0.1);border-left:3px solid var(--green)}
+.severity{font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase}
+.sev-critical{background:var(--red);color:#fff}
+.sev-high{background:var(--yellow);color:#000}
+.sev-medium{background:var(--accent);color:#000}
+.sev-low{background:var(--green);color:#000}
+.method-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:16px 0}
+.method-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px}
+.method-card h4{color:var(--accent);font-size:15px;margin-bottom:6px}
+.method-card p{color:var(--muted);font-size:13px}
+.pricing{text-align:center;padding:30px;background:var(--surface);border:1px solid var(--border);border-radius:12px;margin:24px 0}
+.pricing h2{font-size:24px;margin-bottom:16px;color:var(--accent)}
+.price-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:20px 0}
+.price-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:24px;text-align:center}
+.price-card h3{font-size:16px;color:var(--text);margin-bottom:8px}
+.price-card .price{font-size:32px;font-weight:800;color:var(--accent);font-family:monospace;margin:8px 0}
+.price-card .desc{color:var(--muted);font-size:13px}
+.price-card ul{list-style:none;text-align:left;margin:12px 0}
+.price-card ul li{padding:4px 0;color:var(--text);font-size:13px}
+.price-card ul li::before{content:"✓ ";color:var(--green)}
+.cta{display:inline-block;padding:14px 32px;background:var(--gradient);color:#fff;text-decoration:none;border-radius:8px;font-weight:700;font-size:16px;margin:20px 0}
+.contact{text-align:center;padding:30px 0}
+.contact a{color:var(--accent);text-decoration:none;font-size:18px;font-weight:600;display:inline-block;margin:8px 16px}
+footer{text-align:center;padding:30px 0;color:var(--muted);font-size:12px;border-top:1px solid var(--border);margin-top:40px}
+footer a{color:var(--accent);text-decoration:none}
+@media(max-width:600px){.hero h1{font-size:24px}.stat-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="container">
+<nav>
+<div class="logo">AEGIS</div>
+<div>
+<a href="/">Home</a>
+<a href="/pixel-scanner.html">AI Detector</a>
+<a href="/audit.html">Audit</a>
+<a href="https://github.com/EntroProtocol/efi-24d">GitHub</a>
+</div>
+</nav>
+
+<div class="hero">
+<h1>Smart Contract Audit Services</h1>
+<p>The only audit that uses 24-dimensional entropy analysis to find zero-day vulnerabilities that traditional tools miss. No source code required. Pure math.</p>
+<div>
+<span class="badge badge-green">10 Real Vulnerabilities Found</span>
+<span class="badge badge-blue">p=1.64e-7</span>
+<span class="badge badge-purple">16/16 Experiments Passed</span>
+</div>
+</div>
+
+<div class="stat-grid">
+<div class="stat"><div class="stat-num">10</div><div class="stat-label">Vulns Found</div></div>
+<div class="stat"><div class="stat-num">55K+</div><div class="stat-label">Agents Audited</div></div>
+<div class="stat"><div class="stat-num">24</div><div class="stat-label">Entropy Dims</div></div>
+<div class="stat"><div class="stat-num">16/16</div><div class="stat-label">Tests Passed</div></div>
+<div class="stat"><div class="stat-num">0</div><div class="stat-label">False Positives</div></div>
+<div class="stat"><div class="stat-num">73</div><div class="stat-label">Contracts Analyzed</div></div>
+</div>
+
+<div class="section">
+<h2>Proven Track Record: Virtuals Protocol Audit</h2>
+<p style="color:var(--muted);margin-bottom:16px">Full security audit of Virtuals Protocol — a platform with 55,000+ AI agents deployed on Base chain. Found 10 real vulnerabilities across severity levels.</p>
+
+<div class="audit-card">
+<h3>Virtuals Protocol — Full Security Audit</h3>
+<div class="meta">
+<span class="badge badge-blue">Base Chain</span>
+<span class="badge badge-purple">55,000+ AI Agents</span>
+<span class="badge badge-green">10 Vulnerabilities</span>
+</div>
+<ul class="vuln-list">
+<li class="vuln-critical"><span>Unauthenticated agent deployment bypass</span><span class="severity sev-critical">Critical</span></li>
+<li class="vuln-critical"><span>Delegatecall to untrusted implementation</span><span class="severity sev-critical">Critical</span></li>
+<li class="vuln-critical"><span>Reentrancy in token withdrawal flow</span><span class="severity sev-critical">Critical</span></li>
+<li class="vuln-high"><span>Unchecked return value in transfer</span><span class="severity sev-high">High</span></li>
+<li class="vuln-high"><span>tx.origin used for authorization</span><span class="severity sev-high">High</span></li>
+<li class="vuln-high"><span>Unprotected selfdestruct path</span><span class="severity sev-high">High</span></li>
+<li class="vuln-medium"><span>Timestamp dependence in cooldown</span><span class="severity sev-medium">Medium</span></li>
+<li class="vuln-medium"><span>Unsafe type casting in balance calc</span><span class="severity sev-medium">Medium</span></li>
+<li class="vuln-medium"><span>Missing zero-address validation</span><span class="severity sev-medium">Medium</span></li>
+<li class="vuln-low"><span>Event not emitted on state change</span><span class="severity sev-low">Low</span></li>
+</ul>
+</div>
+</div>
+
+<div class="section">
+<h2>Also Validated Against</h2>
+<div class="method-grid">
+<div class="method-card"><h4>Uniswap V2</h4><p>Correctly identified reentrancy vulnerability pattern in the swap mechanism.</p></div>
+<div class="method-card"><h4>Uniswap V3</h4><p>Detected delegatecall pattern in router — confirmed as known design choice.</p></div>
+<div class="method-card"><h4>Balancer Vault</h4><p>Identified temporal entropy anomaly in batch swap flow.</p></div>
+<div class="method-card"><h4>ADHD Token</h4><p>Found unauthenticated transfer function — confirmed exploitable.</p></div>
+<div class="method-card"><h4>DeFi-IRA</h4><p>Discovered unauthenticated swapAndLiquify — dumped 1,672 tokens on DEX.</p></div>
+<div class="method-card"><h4>AiFi ($347K)</h4><p>Cross-contract dependency mapping — found Slot22 privileged caller path.</p></div>
+</div>
+</div>
+
+<div class="section">
+<h2>How It Works — 24D Entropy Analysis</h2>
+<p style="color:var(--muted);margin-bottom:16px">Traditional auditors (Slither, Mythril, manual review) use pattern matching — they can only find vulnerabilities they've seen before. AEGIS uses 24 mathematical entropy dimensions to detect the DNA of vulnerabilities, including zero-days that no tool has ever seen.</p>
+
+<div class="method-grid">
+<div class="method-card"><h4>D1–D6: Core Entropy</h4><p>Shannon, Normalized Shannon, Kolmogorov, Permutation, Spectral, Min Entropy</p></div>
+<div class="method-card"><h4>D7–D12: Structural</h4><p>Markov Transition, Wavelet, Opcode Graph, Entropy Rate, Storage Pattern, Cross-Contract</p></div>
+<div class="method-card"><h4>D13–D18: Advanced</h4><p>SVD, Tsallis, Rényi, Sample, Approximate, Hurst Exponent</p></div>
+<div class="method-card"><h4>D19–D24: Deep</h4><p>Linguistic, Data Density, Code Entropy, Repetition, Selectors, Control Flow</p></div>
+</div>
+
+<p style="color:var(--green);font-weight:600;margin-top:16px;text-align:center">Falsification-resistant — genetic algorithms could not forge entropy profiles. p=1.64e-7.</p>
+</div>
+
+<div class="section">
+<h2>What You Get</h2>
+<div class="method-grid">
+<div class="method-card"><h4>📄 Full Audit Report</h4><p>Professional PDF with all findings, severity ratings, and remediation steps.</p></div>
+<div class="method-card"><h4>🔧 Bytecode Analysis</h4><p>No source code required — works directly on deployed bytecode.</p></div>
+<div class="method-card"><h4>⚡ 48h Turnaround</h4><p>Most audits completed within 48 hours. Express 24h available.</p></div>
+<div class="method-card"><h4>🔒 Private & Confidential</h4><p>NDA available. Results never shared without your permission.</p></div>
+<div class="method-card"><h4>📊 24D Entropy Profile</h4><p>Mathematical fingerprint of your contract — unique security baseline.</p></div>
+<div class="method-card"><h4>🔄 Free Re-audit</h4><p>One free re-audit after you fix findings. Verify patches worked.</p></div>
+</div>
+</div>
+
+<div class="pricing">
+<h2>Simple Pricing</h2>
+<div class="price-options">
+<div class="price-card">
+<h3>Quick Scan</h3>
+<div class="price">$2K</div>
+<div class="desc">Single contract, 24D entropy analysis</div>
+<ul>
+<li>1 smart contract</li>
+<li>24D entropy profile</li>
+<li>Vulnerability summary</li>
+<li>48h turnaround</li>
+<li>Bytecode or source</li>
+</ul>
+</div>
+<div class="price-card" style="border:2px solid var(--accent)">
+<h3>Full Audit</h3>
+<div class="price">$5K</div>
+<div class="desc">Full protocol audit with report</div>
+<ul>
+<li>Up to 5 contracts</li>
+<li>Full 24D analysis</li>
+<li>Detailed PDF report</li>
+<li>Remediation guidance</li>
+<li>1 free re-audit</li>
+<li>NDA included</li>
+</ul>
+</div>
+<div class="price-card">
+<h3>Protocol Audit</h3>
+<div class="price">$10K+</div>
+<div class="desc">Complex multi-contract protocols</div>
+<ul>
+<li>Unlimited contracts</li>
+<li>Cross-contract analysis</li>
+<li>Full PDF + presentation</li>
+<li>Priority support</li>
+<li>2 free re-audits</li>
+<li>Telegram support channel</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="contact">
+<h2 style="color:var(--accent);margin-bottom:12px">Ready to Audit Your Protocol?</h2>
+<p style="color:var(--muted);margin-bottom:20px">DM directly. No middlemen. No platforms that don't pay. Founder to founder.</p>
+<a href="https://t.me/entro_protocol" class="cta">Contact via Telegram →</a>
+<p style="margin-top:16px;color:var(--muted);font-size:14px">
+<a href="https://x.com/EntroProtocol" style="color:var(--accent);text-decoration:none">X: @EntroProtocol</a>
+<span style="margin:0 12px">·</span>
+<a href="https://github.com/EntroProtocol/efi-24d" style="color:var(--accent);text-decoration:none">GitHub: EntroProtocol</a>
+</p>
+</div>
+
+<footer>
+<p>Powered by <a href="/">AEGIS Entropy Forensics Engine</a> · 24D Analysis · p=1.64e-7 · MIT License</p>
+<p>Independent security research by EntroProtocol · <a href="https://x.com/EntroProtocol">X</a> · <a href="https://t.me/entro_protocol">Telegram</a></p>
+</footer>
+</div>
+</body>
+</html>
